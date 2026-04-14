@@ -3,12 +3,13 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-// IMPORTANTE: substitua 'academicoweb' pelo nome exato do seu repositório GitHub
+// Base path: '/' para Vercel, '/academicoweb/' para GitHub Pages
 const REPO_NAME = 'academicoweb'
+const isGitHubPages = process.env.GITHUB_PAGES === 'true'
 
 export default defineConfig({
   plugins: [react()],
-  base: process.env.NODE_ENV === 'production' ? `/${REPO_NAME}/` : '/',
+  base: isGitHubPages ? `/${REPO_NAME}/` : '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
