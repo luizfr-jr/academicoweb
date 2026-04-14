@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "github": {
+      "description": "GitHub integration for issue tracking, PR management, and CI/CD",
+      "usage": "Use for creating issues, managing PRs, checking deployment status",
+      "repository": "luizfr-jr/academicoweb"
+    },
+    "gmail": {
+      "description": "Gmail integration for email notifications",
+      "usage": "Use for sending grade notifications and password reset emails"
+    },
+    "slack": {
+      "description": "Slack integration for team notifications",
+      "usage": "Use for notifying professors of new student messages"
+    }
+  }
+}
