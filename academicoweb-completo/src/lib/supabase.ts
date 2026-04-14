@@ -8,7 +8,10 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error('⚠️ Variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY não configuradas!');
 }
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const supabase = createClient(
+  SUPABASE_URL || 'https://placeholder.supabase.co',
+  SUPABASE_ANON_KEY || 'placeholder-key',
+);
 
 // Tipos que espelham as tabelas do banco
 export type DbUsuario = {
