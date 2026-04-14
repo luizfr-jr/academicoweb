@@ -6,17 +6,29 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 
 export function LoginScreen() {
-  const { login, error: storeError, loading } = useStore();
+  const { login, register, error: storeError, loading } = useStore();
+  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [role, setRole] = useState<'professor' | 'aluno'>('professor');
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
-  const handleLogin = async () => {
-    await login(email, senha, role);
+  const handleSubmit = async () => {
+    if (mode === 'login') {
+      await login(email, senha, role);
+    } else {
+      if (!nome.trim()) return;
+      await register(nome, email, senha, role);
+    }
   };
 
   const demoAccess = (e: string, s: string, r: 'professor' | 'aluno') => {
-    setEmail(e); setSenha(s); setRole(r);
+    setEmail(e); setSenha(s); setRole(r); setMode('login');
+  };
+
+  const toggleMode = () => {
+    setMode(mode === 'login' ? 'register' : 'login');
+    useStore.setState({ error: null });
   };
 
   return (
@@ -42,43 +54,61 @@ export function LoginScreen() {
               ))}
             </div>
             <div className="space-y-4">
+              {mode === 'register' && (
+                <div>
+                  <Label className="text-slate-400 text-xs font-medium mb-1.5 block">Nome completo</Label>
+                  <Input value={nome} onChange={(e) => setNome(e.target.value)}
+                    placeholder="Seu nome completo"
+                    className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-600 focus:border-indigo-500"
+                    onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} />
+                </div>
+              )}
               <div>
                 <Label className="text-slate-400 text-xs font-medium mb-1.5 block">E-mail</Label>
                 <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
                   className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-600 focus:border-indigo-500"
-                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()} />
+                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} />
               </div>
               <div>
                 <Label className="text-slate-400 text-xs font-medium mb-1.5 block">Senha</Label>
                 <Input type="password" value={senha} onChange={(e) => setSenha(e.target.value)}
                   placeholder="••••••••"
                   className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-600 focus:border-indigo-500"
-                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()} />
+                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} />
               </div>
               {storeError && (
-                <p className="text-red-400 text-xs bg-red-950/50 border border-red-900 rounded-md px-3 py-2">{storeError}</p>
+                <p className="text-red-400 text-xs bg-red-950/50 border border-red-900 rounded-md px-3 py-2" role="alert">{storeError}</p>
               )}
-              <Button onClick={handleLogin} disabled={loading}
+              <Button onClick={handleSubmit} disabled={loading}
                 className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold h-10">
-                {loading ? 'Entrando...' : 'Entrar'}
+                {loading ? (mode === 'login' ? 'Entrando...' : 'Criando conta...') : (mode === 'login' ? 'Entrar' : 'Criar Conta')}
               </Button>
             </div>
-            <div className="mt-5 pt-5 border-t border-slate-800">
-              <p className="text-xs text-slate-600 mb-2 font-medium uppercase tracking-wider">Acesso rápido (demo)</p>
-              <div className="space-y-1.5">
-                <button onClick={() => demoAccess('prof@ufn.edu.br', '123', 'professor')}
-                  className="w-full text-left px-3 py-2 rounded-md bg-slate-900 hover:bg-slate-800 transition text-xs">
-                  <span className="text-indigo-400 font-medium">Professor</span>
-                  <span className="text-slate-500 ml-2">prof@ufn.edu.br / 123</span>
-                </button>
-                <button onClick={() => demoAccess('joao@email.com', '123', 'aluno')}
-                  className="w-full text-left px-3 py-2 rounded-md bg-slate-900 hover:bg-slate-800 transition text-xs">
-                  <span className="text-violet-400 font-medium">Aluno João</span>
-                  <span className="text-slate-500 ml-2">joao@email.com / 123</span>
-                </button>
-              </div>
+
+            <div className="mt-4 text-center">
+              <button onClick={toggleMode} className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+                {mode === 'login' ? 'Não tem conta? Criar conta' : 'Já tem conta? Entrar'}
+              </button>
             </div>
+
+            {mode === 'login' && (
+              <div className="mt-5 pt-5 border-t border-slate-800">
+                <p className="text-xs text-slate-600 mb-2 font-medium uppercase tracking-wider">Acesso rápido (demo)</p>
+                <div className="space-y-1.5">
+                  <button onClick={() => demoAccess('prof@ufn.edu.br', '123', 'professor')}
+                    className="w-full text-left px-3 py-2 rounded-md bg-slate-900 hover:bg-slate-800 transition text-xs">
+                    <span className="text-indigo-400 font-medium">Professor</span>
+                    <span className="text-slate-500 ml-2">prof@ufn.edu.br / 123</span>
+                  </button>
+                  <button onClick={() => demoAccess('joao@email.com', '123', 'aluno')}
+                    className="w-full text-left px-3 py-2 rounded-md bg-slate-900 hover:bg-slate-800 transition text-xs">
+                    <span className="text-violet-400 font-medium">Aluno João</span>
+                    <span className="text-slate-500 ml-2">joao@email.com / 123</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
