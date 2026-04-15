@@ -20,6 +20,7 @@ interface Store {
 
   // auth
   login: (email: string, senha: string, role: string) => Promise<boolean>;
+  register: (nome: string, email: string, senha: string, role: string) => Promise<boolean>;
   logout: () => Promise<void>;
 
   // bootstrap
@@ -91,6 +92,52 @@ export const useStore = create<Store>()((set, get) => ({
       senha: data.senha_hash,
       role: data.role,
       initials: data.initials,
+    };
+
+    set({ currentUser: user, loading: false });
+    await get().loadData();
+    return true;
+  },
+
+  register: async (nome, email, senha, role) => {
+    set({ loading: true, error: null });
+
+    // Verifica se já existe usuário com esse email
+    const { data: existing } = await supabase
+      .from('usuarios')
+      .select('id')
+      .eq('email', email.toLowerCase().trim())
+      .single();
+
+    if (existing) {
+      set({ loading: false, error: 'Já existe uma conta com esse e-mail.' });
+      return false;
+    }
+
+    const id = uid();
+    const initials = makeInitials(nome);
+
+    const { error } = await supabase.from('usuarios').insert({
+      id,
+      nome: nome.trim(),
+      email: email.toLowerCase().trim(),
+      senha_hash: senha,
+      role,
+      initials,
+    });
+
+    if (error) {
+      set({ loading: false, error: 'Erro ao criar conta. Tente novamente.' });
+      return false;
+    }
+
+    const user: Usuario = {
+      id,
+      nome: nome.trim(),
+      email: email.toLowerCase().trim(),
+      senha,
+      role: role as 'professor' | 'aluno',
+      initials,
     };
 
     set({ currentUser: user, loading: false });
