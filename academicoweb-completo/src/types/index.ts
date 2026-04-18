@@ -43,6 +43,8 @@ export interface Mensagem {
   msg: string;
   data: string;
   lida: boolean;
+  resposta?: string;
+  respondidaEm?: string;
 }
 
 export interface AppState {
