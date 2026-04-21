@@ -70,8 +70,14 @@ CREATE TABLE IF NOT EXISTS public.mensagens (
   assunto        TEXT NOT NULL,
   mensagem       TEXT NOT NULL,
   lida           BOOLEAN DEFAULT false,
+  resposta       TEXT,
+  respondida_em  TIMESTAMPTZ,
   created_at     TIMESTAMPTZ DEFAULT now()
 );
+
+-- Migração: adiciona colunas de resposta caso a tabela já exista
+ALTER TABLE public.mensagens ADD COLUMN IF NOT EXISTS resposta TEXT;
+ALTER TABLE public.mensagens ADD COLUMN IF NOT EXISTS respondida_em TIMESTAMPTZ;
 
 -- ============================================================
 --  ROW LEVEL SECURITY (RLS)

@@ -71,5 +71,7 @@ export type DbMensagem = {
   assunto: string;
   mensagem: string;
   lida: boolean;
+  resposta?: string;
+  respondida_em?: string;
   created_at?: string;
 };

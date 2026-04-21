@@ -45,8 +45,9 @@ interface Store {
   setMultipleNotas: (discId: string, alunoId: string, notas: Record<string, number | null>) => Promise<void>;
 
   // mensagens
-  addMensagem: (m: Omit<Mensagem, 'id' | 'data' | 'lida'>) => Promise<void>;
+  addMensagem: (m: Omit<Mensagem, 'id' | 'data' | 'lida' | 'resposta' | 'respondidaEm'>) => Promise<void>;
   markMensagemLida: (id: string) => Promise<void>;
+  replyMensagem: (id: string, resposta: string) => Promise<void>;
 
   // password
   changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
@@ -229,6 +230,13 @@ export const useStore = create<Store>()((set, get) => ({
           day: '2-digit', month: '2-digit', year: 'numeric',
           hour: '2-digit', minute: '2-digit',
         }),
+        resposta: m.resposta,
+        respondidaEm: m.respondida_em
+          ? new Date(m.respondida_em).toLocaleString('pt-BR', {
+              day: '2-digit', month: '2-digit', year: 'numeric',
+              hour: '2-digit', minute: '2-digit',
+            })
+          : undefined,
       }));
 
       set({ disciplinas, usuarios, mensagens, loading: false });
@@ -458,6 +466,20 @@ export const useStore = create<Store>()((set, get) => ({
     await supabase.from('mensagens').update({ lida: true }).eq('id', id);
     set((s) => ({
       mensagens: s.mensagens.map((m) => (m.id === id ? { ...m, lida: true } : m)),
+    }));
+  },
+
+  replyMensagem: async (id, resposta) => {
+    const now = new Date().toISOString();
+    await supabase.from('mensagens').update({ resposta, respondida_em: now, lida: true }).eq('id', id);
+    const respondidaEm = new Date(now).toLocaleString('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+    set((s) => ({
+      mensagens: s.mensagens.map((m) =>
+        m.id === id ? { ...m, resposta, respondidaEm, lida: true } : m
+      ),
     }));
   },
 

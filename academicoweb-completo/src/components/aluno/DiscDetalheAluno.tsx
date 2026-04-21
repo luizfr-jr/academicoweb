@@ -5,13 +5,15 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatNota, notaColor, notaBg, situacao, situacaoBadge } from '@/lib/utils-app';
 import { ChatModal } from './ChatModal';
+import { MessageSquare } from 'lucide-react';
 
 export function DiscDetalheAluno({ disc, onBack }: { disc: Disciplina; onBack: () => void }) {
-  const { currentUser, calcMedia } = useStore();
+  const { currentUser, calcMedia, getMensagensDaDisciplina } = useStore();
   const [showChat, setShowChat] = useState(false);
   if (!currentUser) return null;
 
   const alunoId = currentUser.id;
+  const minhasMensagens = getMensagensDaDisciplina(disc.id).filter((m) => m.alunoId === alunoId);
   const notas = disc.notas[alunoId] || {};
   const grupos: Record<MediaGrupo, typeof disc.atividades> = { M1: [], M2: [], M3: [] };
   disc.atividades.forEach((a) => grupos[a.media].push(a));
@@ -121,6 +123,36 @@ export function DiscDetalheAluno({ disc, onBack }: { disc: Disciplina; onBack: (
 
       {disc.atividades.length === 0 && (
         <div className="text-center py-8 text-muted-foreground text-sm">Nenhuma atividade cadastrada nesta disciplina.</div>
+      )}
+
+      {minhasMensagens.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            <MessageSquare className="w-4 h-4" /> Minhas dúvidas
+          </h3>
+          {minhasMensagens.map((m) => (
+            <div key={m.id} className="rounded-xl border bg-card p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-sm">{m.assunto}</span>
+                {m.resposta ? (
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 font-medium">Respondida</span>
+                ) : (
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 font-medium">Aguardando</span>
+                )}
+              </div>
+              <div className="text-xs text-muted-foreground">{m.data}</div>
+              <div className="text-sm text-muted-foreground leading-relaxed">{m.msg}</div>
+              {m.resposta && (
+                <div className="mt-2 pl-3 border-l-2 border-emerald-400 dark:border-emerald-600">
+                  <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mb-1">
+                    Resposta do professor · {m.respondidaEm}
+                  </div>
+                  <div className="text-sm leading-relaxed">{m.resposta}</div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
 
       {showChat && <ChatModal open discId={disc.id} onClose={() => setShowChat(false)} />}
